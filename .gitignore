@@ -11,3 +11,7 @@ wheels/
 
 .env
 .pychache/
+.pytest_cache/
+data/*.db
+data/
+.github

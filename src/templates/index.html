@@ -1,0 +1,316 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard &bull; HITL LinkedIn Agent{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+  <!-- Intro Banner -->
+  <div class="bg-gradient-to-r from-blue-900 to-indigo-900 rounded-2xl p-6 md:p-8 text-white shadow-lg relative overflow-hidden">
+    <div class="relative z-10 max-w-3xl">
+      <div class="inline-flex items-center gap-2 bg-blue-800/60 backdrop-blur-md px-3 py-1 rounded-full text-xs font-semibold text-blue-200 mb-3 border border-blue-400/20">
+        <i class="fa-solid fa-shield-halved"></i> Production Human-in-the-Loop Architecture
+      </div>
+      <h1 class="text-2xl md:text-3xl font-bold tracking-tight">Autonomous Content Generation with Human Oversight</h1>
+      <p class="mt-2 text-blue-100 text-sm md:text-base leading-relaxed">
+        The agent drafts the LinkedIn post and halts execution with a persistent LangGraph interrupt. You receive an email notification and can approve immediately or days later. Once approved, it publishes directly to LinkedIn.
+      </p>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <!-- Left Column: Generator Form -->
+    <div class="lg:col-span-5 space-y-6">
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2 mb-4">
+          <i class="fa-solid fa-pen-nib text-linkedin"></i> Create New LinkedIn Post
+        </h2>
+
+        <form id="generateForm" class="space-y-4">
+          <div>
+            <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
+              Topic <span class="text-red-500">*</span>
+            </label>
+            <input type="text" id="topic" name="topic" required
+              placeholder="e.g. LangGraph Agentic Workflows in Aerospace"
+              class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-linkedin focus:border-linkedin transition">
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
+              Key Talking Points
+            </label>
+            <textarea id="key_points" name="key_points" rows="3"
+              placeholder="e.g. Human-in-the-loop, fault tolerance, autonomous decision making, enterprise ROI"
+              class="w-full px-3.5 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-linkedin focus:border-linkedin transition"></textarea>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">Tone</label>
+              <select id="tone" name="tone" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-linkedin focus:border-linkedin">
+                <option value="professional yet engaging" selected>Professional & Engaging</option>
+                <option value="thought-leadership and visionary">Visionary Thought Leadership</option>
+                <option value="conversational and friendly">Conversational & Friendly</option>
+                <option value="educational and technical">Technical Breakdown</option>
+                <option value="bold and contrarian">Bold & Contrarian</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">Audience</label>
+              <input type="text" id="audience" name="audience" value="AI engineers & tech leaders"
+                class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-linkedin focus:border-linkedin">
+            </div>
+          </div>
+
+          <button type="submit" id="generateBtn"
+            class="w-full mt-2 bg-linkedin hover:bg-linkedin-dark text-white font-semibold py-2.5 px-4 rounded-lg text-sm shadow-sm transition flex items-center justify-center gap-2">
+            <span>Generate Draft & Trigger HITL</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </form>
+
+        <div id="genFeedback" class="hidden mt-4 p-3 rounded-lg text-sm"></div>
+      </div>
+    </div>
+
+    <!-- Right Column: Tabs (Pending Review, Published, Notifications) -->
+    <div class="lg:col-span-7 space-y-4">
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <!-- Tabs Nav -->
+        <div class="flex border-b border-gray-200 bg-gray-50 px-4 pt-3">
+          <button onclick="switchTab('approvals')" id="tab-btn-approvals"
+            class="px-4 py-2.5 text-sm font-semibold border-b-2 border-linkedin text-linkedin flex items-center gap-2">
+            <i class="fa-solid fa-clock"></i> Awaiting Review
+            <span id="pendingCount" class="px-2 py-0.5 text-xs bg-amber-100 text-amber-800 rounded-full font-bold">0</span>
+          </button>
+          <button onclick="switchTab('published')" id="tab-btn-published"
+            class="px-4 py-2.5 text-sm font-semibold border-b-2 border-transparent text-gray-500 hover:text-gray-700 flex items-center gap-2">
+            <i class="fa-solid fa-check-circle"></i> Published to LinkedIn
+          </button>
+          <button onclick="switchTab('notifications')" id="tab-btn-notifications"
+            class="px-4 py-2.5 text-sm font-semibold border-b-2 border-transparent text-gray-500 hover:text-gray-700 flex items-center gap-2">
+            <i class="fa-solid fa-envelope"></i> Notifications
+          </button>
+        </div>
+
+        <!-- Tab 1: Approvals -->
+        <div id="tab-approvals" class="p-6 space-y-4">
+          <div id="approvalsList" class="space-y-4">
+            <div class="text-center py-12 text-gray-400">
+              <i class="fa-solid fa-spinner fa-spin text-2xl mb-2"></i>
+              <p class="text-sm">Loading approval queue...</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 2: Published -->
+        <div id="tab-published" class="p-6 space-y-4 hidden">
+          <div id="publishedList" class="space-y-4">
+            <div class="text-center py-12 text-gray-400">
+              <p class="text-sm">No published posts yet.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 3: Notifications -->
+        <div id="tab-notifications" class="p-6 space-y-4 hidden">
+          <div id="notificationsList" class="space-y-4">
+            <div class="text-center py-12 text-gray-400">
+              <p class="text-sm">No notifications recorded yet.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function switchTab(tabName) {
+    ['approvals', 'published', 'notifications'].forEach(t => {
+      document.getElementById(`tab-${t}`).classList.add('hidden');
+      document.getElementById(`tab-btn-${t}`).classList.remove('border-linkedin', 'text-linkedin');
+      document.getElementById(`tab-btn-${t}`).classList.add('border-transparent', 'text-gray-500');
+    });
+    document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+    document.getElementById(`tab-btn-${tabName}`).classList.remove('border-transparent', 'text-gray-500');
+    document.getElementById(`tab-btn-${tabName}`).classList.add('border-linkedin', 'text-linkedin');
+  }
+
+  async function loadDashboard() {
+    try {
+      const res = await fetch('/api/posts');
+      const posts = await res.json();
+      
+      const pending = posts.filter(p => p.status === 'waiting_for_approval' || p.status === 'revising');
+      const published = posts.filter(p => p.status === 'published');
+      
+      document.getElementById('pendingCount').textContent = pending.length;
+      
+      // Render Pending
+      const appList = document.getElementById('approvalsList');
+      if (pending.length === 0) {
+        appList.innerHTML = `
+          <div class="text-center py-10 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+            <i class="fa-solid fa-circle-check text-emerald-500 text-3xl mb-2"></i>
+            <h3 class="text-sm font-semibold text-gray-700">All caught up!</h3>
+            <p class="text-xs text-gray-400 mt-1">Generate a post on the left to start a new HITL workflow.</p>
+          </div>
+        `;
+      } else {
+        appList.innerHTML = pending.map(p => `
+          <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-xs hover:border-blue-300 transition">
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200">
+                  <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Needs Review
+                </span>
+                <h3 class="font-bold text-gray-900 mt-2 text-base">${escapeHtml(p.topic)}</h3>
+              </div>
+              <a href="/review/${p.thread_id}" class="inline-flex items-center gap-1.5 px-4 py-2 bg-linkedin text-white text-xs font-semibold rounded-lg hover:bg-linkedin-dark transition shrink-0 shadow-xs">
+                Review & Approve <i class="fa-solid fa-arrow-right"></i>
+              </a>
+            </div>
+            <div class="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-100 text-xs text-gray-700 font-mono whitespace-pre-wrap line-clamp-3">
+              ${escapeHtml(p.current_draft || 'Draft generated...')}
+            </div>
+            <div class="mt-3 flex items-center justify-between text-xs text-gray-400">
+              <span>Thread: <code class="text-gray-600">${p.thread_id}</code></span>
+              <span>${p.created_at ? new Date(p.created_at).toLocaleString() : ''}</span>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      // Render Published
+      const pubList = document.getElementById('publishedList');
+      if (published.length === 0) {
+        pubList.innerHTML = `<p class="text-center py-8 text-sm text-gray-400">No published posts yet.</p>`;
+      } else {
+        pubList.innerHTML = published.map(p => `
+          <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-xs">
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                  <i class="fa-solid fa-check"></i> Published
+                </span>
+                <h3 class="font-bold text-gray-900 mt-2 text-base">${escapeHtml(p.topic)}</h3>
+              </div>
+              ${p.post_url ? `
+                <a href="${p.post_url}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-linkedin text-xs font-semibold rounded-lg hover:bg-blue-100 transition shrink-0 border border-blue-200">
+                  View Post <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                </a>
+              ` : ''}
+            </div>
+            <div class="mt-3 p-3 bg-gray-50 rounded-lg text-xs text-gray-700 whitespace-pre-wrap">
+              ${escapeHtml(p.current_draft)}
+            </div>
+            <div class="mt-3 text-xs text-gray-400">
+              Post ID: <code class="text-gray-600">${escapeHtml(p.post_id || 'N/A')}</code>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      // Load Notifications
+      loadNotifications();
+
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  async function loadNotifications() {
+    try {
+      const res = await fetch('/api/notifications');
+      const notifs = await res.json();
+      const nList = document.getElementById('notificationsList');
+      if (!notifs || notifs.length === 0) {
+        nList.innerHTML = `<p class="text-center py-8 text-sm text-gray-400">No notifications sent yet.</p>`;
+        return;
+      }
+      nList.innerHTML = notifs.map(n => `
+        <div class="border border-gray-200 rounded-xl p-4 bg-white shadow-xs">
+          <div class="flex items-center justify-between text-xs text-gray-500 mb-1">
+            <span class="font-semibold text-gray-800">${escapeHtml(n.subject)}</span>
+            <span>${new Date(n.timestamp).toLocaleTimeString()}</span>
+          </div>
+          <p class="text-xs text-gray-600 italic mb-2">"${escapeHtml(n.message)}"</p>
+          <div class="p-2 bg-gray-50 rounded text-xs text-gray-700 line-clamp-2 border border-gray-100 mb-3 font-mono">
+            ${escapeHtml(n.draft_snippet)}
+          </div>
+          <div class="flex items-center gap-2">
+            <a href="${n.review_url}" class="text-xs font-semibold text-linkedin hover:underline">
+              Open Review Page &rarr;
+            </a>
+            <span class="text-gray-300">|</span>
+            <a href="${n.quick_approve_url}" class="text-xs font-semibold text-emerald-600 hover:underline">
+              1-Click Approve Link
+            </a>
+          </div>
+        </div>
+      `).join('');
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+  }
+
+  // Handle Form Submit
+  document.getElementById('generateForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('generateBtn');
+    const feedback = document.getElementById('genFeedback');
+    
+    btn.disabled = true;
+    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Generating Post...`;
+    feedback.className = 'hidden';
+
+    const payload = {
+      topic: document.getElementById('topic').value,
+      key_points: document.getElementById('key_points').value,
+      tone: document.getElementById('tone').value,
+      audience: document.getElementById('audience').value
+    };
+
+    try {
+      const res = await fetch('/api/posts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      
+      if (res.ok) {
+        feedback.className = 'mt-4 p-3 rounded-lg text-sm bg-emerald-50 text-emerald-800 border border-emerald-200 block';
+        feedback.innerHTML = `
+          <strong>Draft Generated!</strong> Notification dispatched.
+          <a href="/review/${data.thread_id}" class="underline font-semibold block mt-1">
+            Click here to Review & Approve &rarr;
+          </a>
+        `;
+        document.getElementById('generateForm').reset();
+        loadDashboard();
+      } else {
+        throw new Error(data.detail || 'Failed to generate post');
+      }
+    } catch (err) {
+      feedback.className = 'mt-4 p-3 rounded-lg text-sm bg-rose-50 text-rose-800 border border-rose-200 block';
+      feedback.textContent = err.message;
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = `<span>Generate Draft & Trigger HITL</span> <i class="fa-solid fa-arrow-right"></i>`;
+    }
+  });
+
+  // Initial load
+  loadDashboard();
+</script>
+{% endblock %}
