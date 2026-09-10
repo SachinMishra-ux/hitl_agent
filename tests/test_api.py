@@ -83,3 +83,9 @@ def test_ui_templates():
     notif_res = client.get("/api/notifications")
     assert notif_res.status_code == 200
     assert isinstance(notif_res.json(), list)
+
+    # Test test-email endpoint when unconfigured
+    test_mail_res = client.post("/api/notifications/test-email")
+    assert test_mail_res.status_code == 200
+    assert test_mail_res.json()["success"] is False  # Fails gracefully when SMTP is not configured
+

@@ -180,15 +180,58 @@ HITL Agent System
             except Exception as e:
                 logger.warning(f"Failed to send email via SMTP: {e}. Notification recorded in in-app store.")
                 notification_record["smtp_error"] = str(e)
-        else:
-            logger.info(
-                f"[NOTIFICATION LOG] Draft ready for review (Thread: {thread_id}). "
-                f"Review URL: {review_url} | Quick Approve: {quick_approve_url}"
-            )
-
         # Store in notification center
         notification_store.record(notification_record)
         return notification_record
+
+    @property
+    def is_configured(self) -> bool:
+        return bool(self.smtp_host and self.smtp_user and self.smtp_password and self.recipient_email)
+
+    def send_test_email(self, recipient: Optional[str] = None) -> Dict[str, Any]:
+        """
+        Sends a test email to verify SMTP connection.
+        """
+        to_email = recipient or self.recipient_email
+        if not to_email:
+            return {"success": False, "error": "No recipient email configured"}
+
+        if not (self.smtp_host and self.smtp_user and self.smtp_password):
+            return {
+                "success": False,
+                "error": "SMTP credentials missing. Please set SMTP_HOST, SMTP_USER, and SMTP_PASSWORD in .env",
+            }
+
+        try:
+            msg = MIMEMultipart("alternative")
+            msg["Subject"] = "Test Notification: HITL Agent Email Delivery Working!"
+            msg["From"] = self.sender_email
+            msg["To"] = to_email
+
+            body = """Hello Sachin!
+
+This is a test notification from your Human-in-the-Loop (HITL) LinkedIn Agent.
+Your SMTP outgoing email configuration is active and working properly!
+
+Future post drafts will now be delivered directly to this inbox.
+"""
+            msg.attach(MIMEText(body, "plain"))
+
+            logger.info(f"Sending test email via {self.smtp_host}:{self.smtp_port} to {to_email}...")
+            server = smtplib.SMTP(self.smtp_host, self.smtp_port, timeout=15)
+            if self.use_tls:
+                server.starttls()
+            server.login(self.smtp_user, self.smtp_password)
+            server.sendmail(self.sender_email, [to_email], msg.as_string())
+            server.quit()
+
+            return {
+                "success": True,
+                "message": f"Test email successfully delivered to {to_email}!",
+            }
+        except Exception as e:
+            logger.error(f"Test email failed: {e}")
+            return {"success": False, "error": str(e)}
 
 
 notifier = EmailNotifier()

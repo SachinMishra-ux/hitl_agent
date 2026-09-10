@@ -63,3 +63,5 @@ class HealthResponse(BaseModel):
     linkedin_author_urn: Optional[str]
     linkedin_connected: bool
     database_ok: bool
+    smtp_configured: bool = False
+    notification_email: Optional[str] = None

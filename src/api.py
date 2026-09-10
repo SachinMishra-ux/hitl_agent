@@ -20,7 +20,7 @@ from src.workflow import (
     get_post_details,
     list_posts,
 )
-from src.notifier import notification_store
+from src.notifier import notifier, notification_store
 from src.linkedin import LinkedInPublisher
 
 logger = logging.getLogger(__name__)
@@ -174,10 +174,19 @@ async def get_notifications_endpoint():
     return notification_store.get_all()
 
 
+@app.post("/api/notifications/test-email")
+async def send_test_email_endpoint():
+    """
+    Attempts to send a test email using configured SMTP settings.
+    """
+    result = notifier.send_test_email()
+    return result
+
+
 @app.get("/api/health", response_model=HealthResponse)
 async def health_check():
     """
-    Health check verifying LLM, LinkedIn connection, and database status.
+    Health check verifying LLM, LinkedIn connection, database status, and SMTP email setup.
     """
     linkedin = LinkedInPublisher()
     cred_check = linkedin.verify_credentials()
@@ -194,4 +203,6 @@ async def health_check():
         linkedin_author_urn=settings.LINKEDIN_AUTHOR_URN,
         linkedin_connected=linkedin_ok,
         database_ok=db_ok,
+        smtp_configured=notifier.is_configured,
+        notification_email=settings.NOTIFICATION_EMAIL,
     )
