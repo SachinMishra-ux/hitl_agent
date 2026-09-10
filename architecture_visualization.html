@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HITL LinkedIn Agent — Complete Architecture & Teaching Visualizer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: 'dark',
+      themeVariables: {
+        darkMode: true,
+        background: '#020617',
+        primaryColor: '#1e40af',
+        primaryTextColor: '#f8fafc',
+        primaryBorderColor: '#3b82f6',
+        lineColor: '#60a5fa',
+        secondaryColor: '#0f172a',
+        tertiaryColor: '#020617'
+      }
+    });
+  </script>
+  <style>
+    .node-active {
+      border-color: #3b82f6 !important;
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+    }
+    .mermaid svg {
+      max-width: 100% !important;
+      height: auto !important;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen p-4 md:p-8">
+  <div class="max-w-7xl mx-auto space-y-8">
+
+    <!-- Top Banner & Navigation Header -->
+    <header class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 md:p-8 shadow-2xl backdrop-blur-sm">
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+        <div>
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-400 text-xs font-bold uppercase tracking-wider mb-2">
+            <i class="fa-solid fa-graduation-cap"></i> Interactive Teaching & Architecture Explorer
+          </div>
+          <h1 class="text-2xl md:text-3xl font-black text-white tracking-tight">
+            Human-in-the-Loop (HITL) LinkedIn Agent
+          </h1>
+          <p class="text-sm text-slate-400 mt-2 max-w-3xl leading-relaxed">
+            A comprehensive, function-by-function architecture guide designed for lecture presentations and student learning. Explains how <code>main.py</code>, FastAPI, LangGraph, Google Gemini, and LinkedIn REST API connect to handle asynchronous human approval across days.
+          </p>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="flex flex-wrap gap-2 shrink-0">
+          <button onclick="setTab('interactive')" id="btn-interactive"
+            class="px-4 py-2.5 rounded-xl text-xs font-bold bg-blue-600 text-white shadow-lg shadow-blue-600/30 flex items-center gap-2 transition">
+            <i class="fa-solid fa-diagram-project"></i> 1. State Machine
+          </button>
+          <button onclick="setTab('mermaid')" id="btn-mermaid"
+            class="px-4 py-2.5 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 hover:text-white border border-slate-700 flex items-center gap-2 transition">
+            <i class="fa-solid fa-network-wired"></i> 2. Architecture Diagrams
+          </button>
+          <button onclick="setTab('functions')" id="btn-functions"
+            class="px-4 py-2.5 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 hover:text-white border border-slate-700 flex items-center gap-2 transition">
+            <i class="fa-solid fa-code"></i> 3. Function-by-Function
+          </button>
+          <button onclick="setTab('lifecycle')" id="btn-lifecycle"
+            class="px-4 py-2.5 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 hover:text-white border border-slate-700 flex items-center gap-2 transition">
+            <i class="fa-solid fa-clock-rotate-left"></i> 4. 7-Day Lifecycle
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- ════════════════════════════════════════════════════════════════════════ -->
+    <!-- TAB 1: INTERACTIVE STATE MACHINE                                         -->
+    <!-- ════════════════════════════════════════════════════════════════════════ -->
+    <div id="tab-interactive" class="space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- Left Column: Visual Graph Flow -->
+        <div class="lg:col-span-6 bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <h2 class="font-bold text-xs uppercase tracking-wider text-slate-400">
+              LangGraph State Machine (Click any node to inspect)
+            </h2>
+            <span class="text-[11px] font-mono text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20">
+              langgraph.StateGraph(PostState)
+            </span>
+          </div>
+
+          <div class="flex flex-col items-center space-y-3 py-4 select-none">
+            
+            <!-- START -->
+            <div class="px-5 py-1.5 rounded-full bg-emerald-950/80 text-emerald-400 border border-emerald-500/30 text-xs font-mono font-bold tracking-widest">
+              START
+            </div>
+            
+            <i class="fa-solid fa-arrow-down text-slate-600 text-xs"></i>
+
+            <!-- Node 1: generate_draft -->
+            <button onclick="selectNode('generate_draft')" id="node-generate_draft"
+              class="w-full max-w-sm p-4 rounded-xl bg-slate-950 border-2 border-slate-700 hover:border-blue-500 text-left transition group">
+              <div class="flex items-center justify-between">
+                <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 font-bold">Node 1</span>
+                <span class="text-[11px] text-slate-500 font-mono">src.nodes</span>
+              </div>
+              <h3 class="font-bold text-sm text-white mt-1 group-hover:text-blue-400 transition font-mono">generate_draft_node()</h3>
+              <p class="text-xs text-slate-400 mt-1">Invokes Google Gemini 2.5 Flash to generate initial post draft.</p>
+            </button>
+
+            <i class="fa-solid fa-arrow-down text-slate-600 text-xs"></i>
+
+            <!-- Node 2: ask_for_feedback (INTERRUPT) -->
+            <button onclick="selectNode('ask_for_feedback')" id="node-ask_for_feedback"
+              class="w-full max-w-sm p-4 rounded-xl bg-amber-950/20 border-2 border-amber-500/50 hover:border-amber-400 text-left transition group node-active">
+              <div class="flex items-center justify-between">
+                <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold">Node 2 &bull; HITL PAUSE</span>
+                <span class="text-[11px] text-amber-400/60 font-mono">interrupt() + Email</span>
+              </div>
+              <h3 class="font-bold text-sm text-amber-200 mt-1 font-mono">ask_for_feedback_node()</h3>
+              <p class="text-xs text-amber-200/70 mt-1">
+                Dispatches email notification & pauses graph execution in SQLite. Waits hours or days.
+              </p>
+            </button>
+
+            <i class="fa-solid fa-arrow-down text-slate-600 text-xs"></i>
+
+            <!-- Router: decide_next -->
+            <button onclick="selectNode('decide_next')" id="node-decide_next"
+              class="w-56 p-2.5 rounded-lg bg-indigo-950/40 border border-indigo-500/40 text-center hover:border-indigo-400 transition">
+              <span class="text-[10px] font-mono uppercase tracking-wider text-indigo-400 font-bold block">Conditional Edge</span>
+              <span class="font-mono font-bold text-xs text-indigo-200">decide_next(state)</span>
+            </button>
+
+            <!-- Branch Indicators -->
+            <div class="w-full max-w-sm flex justify-between px-6 text-[11px] text-slate-400 font-mono">
+              <span class="flex items-center gap-1"><i class="fa-solid fa-arrow-down-left"></i> approved=False</span>
+              <span class="flex items-center gap-1">approved=True <i class="fa-solid fa-arrow-down-right"></i></span>
+            </div>
+
+            <!-- Two Branch Nodes -->
+            <div class="w-full max-w-sm grid grid-cols-2 gap-3">
+              <!-- Revise -->
+              <button onclick="selectNode('revise_draft')" id="node-revise_draft"
+                class="p-3.5 rounded-xl bg-slate-950 border-2 border-purple-500/30 hover:border-purple-400 text-left transition group">
+                <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-400 font-bold">Node 3</span>
+                <h4 class="font-bold text-xs text-white mt-1 group-hover:text-purple-400 transition font-mono">revise_draft_node()</h4>
+                <p class="text-[10px] text-slate-400 mt-1">Rewrites draft with feedback & loops back.</p>
+              </button>
+
+              <!-- Post to LinkedIn -->
+              <button onclick="selectNode('post_to_linkedin')" id="node-post_to_linkedin"
+                class="p-3.5 rounded-xl bg-slate-950 border-2 border-emerald-500/30 hover:border-emerald-400 text-left transition group">
+                <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold">Node 4</span>
+                <h4 class="font-bold text-xs text-white mt-1 group-hover:text-emerald-400 transition font-mono">post_to_linkedin_node()</h4>
+                <p class="text-[10px] text-slate-400 mt-1">Calls LinkedIn REST API v202511.</p>
+              </button>
+            </div>
+
+            <i class="fa-solid fa-arrow-down text-slate-600 text-xs"></i>
+
+            <!-- END -->
+            <div class="px-5 py-1.5 rounded-full bg-emerald-950/80 text-emerald-400 border border-emerald-500/30 text-xs font-mono font-bold tracking-widest">
+              END
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Right Column: Inspector Panel -->
+        <div class="lg:col-span-6 bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col justify-between space-y-4">
+          <div id="node-inspector" class="space-y-4">
+            <!-- Dynamic Content -->
+          </div>
+
+          <div class="bg-blue-950/30 border border-blue-500/30 rounded-xl p-4 text-xs text-blue-200/90 leading-relaxed">
+            <span class="font-bold text-blue-300 block mb-1">
+              <i class="fa-solid fa-lightbulb"></i> Teaching Note on LangGraph interrupt():
+            </span>
+            Unlike traditional multithreading where worker processes sleep or poll, LangGraph's <code>interrupt()</code> immediately halts execution and serializes channel data to SQLite. No CPU or RAM is consumed while waiting for the human to review.
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════════════════════ -->
+    <!-- TAB 2: SYSTEM ARCHITECTURE & DATA FLOW                                    -->
+    <!-- ════════════════════════════════════════════════════════════════════════ -->
+    <div id="tab-mermaid" class="space-y-6 hidden">
+      
+      <!-- Visual Layer Architecture (Native HTML/SVG - 100% Reliable) -->
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 md:p-8 shadow-xl space-y-6">
+        <div>
+          <h2 class="text-lg font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-sitemap text-blue-400"></i> Full System Architecture & Data Flow
+          </h2>
+          <p class="text-xs text-slate-400 mt-1">
+            Visual map connecting <code>main.py</code> down to nodes, LLM, email notifier, and LinkedIn REST API.
+          </p>
+        </div>
+
+        <!-- Visual Architecture Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-4 pt-2">
+          
+          <!-- Column 1: Entrypoint -->
+          <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 flex flex-col justify-between space-y-3">
+            <div>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 font-bold uppercase">Layer 1: Entry</span>
+              <h3 class="font-bold text-sm text-white mt-2">main.py</h3>
+              <p class="text-xs text-slate-400 mt-1">Boots Uvicorn ASGI server on port 8000.</p>
+            </div>
+            <div class="text-[11px] font-mono text-slate-500 bg-slate-900 p-2 rounded border border-slate-800">
+              uvicorn.run("src.api:app")
+            </div>
+          </div>
+
+          <!-- Column 2: Web & API -->
+          <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 flex flex-col justify-between space-y-3">
+            <div>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-400 font-bold uppercase">Layer 2: API</span>
+              <h3 class="font-bold text-sm text-white mt-2">src/api.py</h3>
+              <p class="text-xs text-slate-400 mt-1">FastAPI routes, Pydantic schemas, and Jinja2 UI views.</p>
+            </div>
+            <div class="text-[11px] font-mono text-slate-500 bg-slate-900 p-2 rounded border border-slate-800">
+              /api/posts<br>/review/:thread_id
+            </div>
+          </div>
+
+          <!-- Column 3: Orchestrator -->
+          <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 flex flex-col justify-between space-y-3">
+            <div>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-purple-500/20 text-purple-400 font-bold uppercase">Layer 3: Graph</span>
+              <h3 class="font-bold text-sm text-white mt-2">src/workflow.py</h3>
+              <p class="text-xs text-slate-400 mt-1">StateGraph orchestrator with persistent SQLite checkpointer.</p>
+            </div>
+            <div class="text-[11px] font-mono text-slate-500 bg-slate-900 p-2 rounded border border-slate-800">
+              graph.invoke(...)<br>Command(resume=...)
+            </div>
+          </div>
+
+          <!-- Column 4: Nodes -->
+          <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 flex flex-col justify-between space-y-3">
+            <div>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 font-bold uppercase">Layer 4: Logic</span>
+              <h3 class="font-bold text-sm text-white mt-2">src/nodes.py</h3>
+              <p class="text-xs text-slate-400 mt-1">Execution units: draft generation, HITL interrupt, revision, publishing.</p>
+            </div>
+            <div class="text-[11px] font-mono text-slate-500 bg-slate-900 p-2 rounded border border-slate-800">
+              generate &bull; interrupt<br>revise &bull; post
+            </div>
+          </div>
+
+          <!-- Column 5: Services -->
+          <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 flex flex-col justify-between space-y-3">
+            <div>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold uppercase">Layer 5: Infra</span>
+              <h3 class="font-bold text-sm text-white mt-2">Services & DB</h3>
+              <p class="text-xs text-slate-400 mt-1">External APIs, SQLite database, and SMTP notifications.</p>
+            </div>
+            <div class="text-[11px] font-mono text-slate-500 bg-slate-900 p-2 rounded border border-slate-800">
+              Gemini &bull; LinkedIn<br>SQLite &bull; SMTP
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Rendered Mermaid Flowchart -->
+        <div class="border-t border-slate-800 pt-6 space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="text-sm font-bold text-white flex items-center gap-2">
+              <i class="fa-solid fa-code-branch text-blue-400"></i> Mermaid Architecture Diagram
+            </h3>
+            <span class="text-[11px] text-slate-500">Rendered via Mermaid.js 10.x</span>
+          </div>
+
+          <div class="bg-slate-950 p-6 rounded-xl border border-slate-800 overflow-x-auto min-h-[300px] flex items-center justify-center">
+            <div id="mermaid-container-1" class="w-full text-center">
+              <p class="text-xs text-slate-500"><i class="fa-solid fa-spinner fa-spin"></i> Rendering diagram...</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Rendered Sequence Diagram -->
+        <div class="border-t border-slate-800 pt-6 space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="text-sm font-bold text-white flex items-center gap-2">
+              <i class="fa-solid fa-timeline text-emerald-400"></i> Asynchronous Lifecycle Sequence Diagram
+            </h3>
+            <span class="text-[11px] text-slate-500">1 to 7+ Days Review Cycle</span>
+          </div>
+
+          <div class="bg-slate-950 p-6 rounded-xl border border-slate-800 overflow-x-auto min-h-[300px] flex items-center justify-center">
+            <div id="mermaid-container-2" class="w-full text-center">
+              <p class="text-xs text-slate-500"><i class="fa-solid fa-spinner fa-spin"></i> Rendering sequence diagram...</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════════════════════ -->
+    <!-- TAB 3: FUNCTION-BY-FUNCTION REFERENCE                                    -->
+    <!-- ════════════════════════════════════════════════════════════════════════ -->
+    <div id="tab-functions" class="space-y-6 hidden">
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
+        <div>
+          <h2 class="text-base font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-code text-indigo-400"></i> Complete Function-by-Function Breakdown
+          </h2>
+          <p class="text-xs text-slate-400 mt-1">
+            Reference table of every module, class, and function in <code>src/</code> and the project root.
+          </p>
+        </div>
+
+        <div class="space-y-4">
+          
+          <!-- main.py -->
+          <div class="border border-slate-800 rounded-xl overflow-hidden">
+            <div class="bg-slate-800/80 px-4 py-2.5 font-mono text-xs font-bold text-blue-300 flex justify-between items-center">
+              <span>main.py (Project Root)</span>
+              <span class="text-[10px] font-sans font-normal text-slate-400">Server Entrypoint</span>
+            </div>
+            <div class="p-4 bg-slate-950 text-xs space-y-2">
+              <p><code>main()</code>: Boots the Uvicorn server on host <code>0.0.0.0</code> and port <code>8000</code> targeting <code>"src.api:app"</code> with hot-reloading.</p>
+            </div>
+          </div>
+
+          <!-- src/config.py -->
+          <div class="border border-slate-800 rounded-xl overflow-hidden">
+            <div class="bg-slate-800/80 px-4 py-2.5 font-mono text-xs font-bold text-blue-300 flex justify-between items-center">
+              <span>src/config.py</span>
+              <span class="text-[10px] font-sans font-normal text-slate-400">Settings Module</span>
+            </div>
+            <div class="p-4 bg-slate-950 text-xs space-y-2">
+              <p><code>Settings(BaseSettings)</code>: Reads <code>.env</code> file into typed properties (Gemini keys, LinkedIn tokens, active version <code>202511</code>, SMTP, SQLite path).</p>
+              <p><code>settings = Settings()</code>: Global singleton instance.</p>
+            </div>
+          </div>
+
+          <!-- src/state.py -->
+          <div class="border border-slate-800 rounded-xl overflow-hidden">
+            <div class="bg-slate-800/80 px-4 py-2.5 font-mono text-xs font-bold text-blue-300 flex justify-between items-center">
+              <span>src/state.py</span>
+              <span class="text-[10px] font-sans font-normal text-slate-400">State Models</span>
+            </div>
+            <div class="p-4 bg-slate-950 text-xs space-y-2">
+              <p><code>WorkflowStatus(Enum)</code>: States: <code>drafting</code>, <code>waiting_for_approval</code>, <code>revising</code>, <code>published</code>, <code>error</code>.</p>
+              <p><code>RevisionHistoryItem(TypedDict)</code>: Tracks revision number, draft string, human feedback, and timestamp.</p>
+              <p><code>PostState(TypedDict)</code>: LangGraph shared channel state holding info, draft, approved, post_id, post_url, error, and history.</p>
+            </div>
+          </div>
+
+          <!-- src/llm.py -->
+          <div class="border border-slate-800 rounded-xl overflow-hidden">
+            <div class="bg-slate-800/80 px-4 py-2.5 font-mono text-xs font-bold text-blue-300 flex justify-between items-center">
+              <span>src/llm.py</span>
+              <span class="text-[10px] font-sans font-normal text-slate-400">LLM Factory</span>
+            </div>
+            <div class="p-4 bg-slate-950 text-xs space-y-2">
+              <p><code>get_llm() -> ChatOpenAI</code>: Factory returning Google Gemini 2.5 Flash via OpenAI-compatible endpoint (<code>https://generativelanguage.googleapis.com/v1beta/openai/</code>) with fallback to Groq and OpenAI.</p>
+            </div>
+          </div>
+
+          <!-- src/linkedin.py -->
+          <div class="border border-slate-800 rounded-xl overflow-hidden">
+            <div class="bg-slate-800/80 px-4 py-2.5 font-mono text-xs font-bold text-blue-300 flex justify-between items-center">
+              <span>src/linkedin.py</span>
+              <span class="text-[10px] font-sans font-normal text-slate-400">LinkedIn REST Client</span>
+            </div>
+            <div class="p-4 bg-slate-950 text-xs space-y-2">
+              <p><code>verify_credentials()</code>: Checks token validity against <code>https://api.linkedin.com/v2/userinfo</code>.</p>
+              <p><code>publish_post(commentary, dry_run)</code>: Makes POST request to <code>https://api.linkedin.com/rest/posts</code> with version <code>202511</code>, returns post URN and public feed link.</p>
+            </div>
+          </div>
+
+          <!-- src/notifier.py -->
+          <div class="border border-slate-800 rounded-xl overflow-hidden">
+            <div class="bg-slate-800/80 px-4 py-2.5 font-mono text-xs font-bold text-blue-300 flex justify-between items-center">
+              <span>src/notifier.py</span>
+              <span class="text-[10px] font-sans font-normal text-slate-400">Notification Service</span>
+            </div>
+            <div class="p-4 bg-slate-950 text-xs space-y-2">
+              <p><code>NotificationStore</code>: In-memory & UI accessible list of dispatched review notifications.</p>
+              <p><code>send_draft_ready_notification(...)</code>: Sends email with review URL and 1-click approve link containing the message: <em>"Your draft is ready. If you are okay with this, you can just approve or if you need any changes, you can just provide the changes."</em></p>
+            </div>
+          </div>
+
+          <!-- src/checkpointer.py -->
+          <div class="border border-slate-800 rounded-xl overflow-hidden">
+            <div class="bg-slate-800/80 px-4 py-2.5 font-mono text-xs font-bold text-blue-300 flex justify-between items-center">
+              <span>src/checkpointer.py</span>
+              <span class="text-[10px] font-sans font-normal text-slate-400">Persistent Checkpointer</span>
+            </div>
+            <div class="p-4 bg-slate-950 text-xs space-y-2">
+              <p><code>get_checkpointer() -> SqliteSaver</code>: Initializes LangGraph's <code>SqliteSaver</code> connected to <code>data/checkpoints.db</code>.</p>
+              <p><code>save_post_metadata(...)</code> & <code>get_all_posts_metadata()</code>: High-speed index of thread metadata for dashboard cards.</p>
+            </div>
+          </div>
+
+          <!-- src/nodes.py -->
+          <div class="border border-slate-800 rounded-xl overflow-hidden">
+            <div class="bg-slate-800/80 px-4 py-2.5 font-mono text-xs font-bold text-blue-300 flex justify-between items-center">
+              <span>src/nodes.py</span>
+              <span class="text-[10px] font-sans font-normal text-slate-400">Workflow Graph Nodes</span>
+            </div>
+            <div class="p-4 bg-slate-950 text-xs space-y-2">
+              <p><code>generate_draft_node(state)</code>: Prompts Gemini and creates initial post.</p>
+              <p><code>ask_for_feedback_node(state)</code>: Dispatches notification, then executes <code>interrupt()</code> to pause the graph.</p>
+              <p><code>decide_next(state)</code>: Conditional router returning <code>post_to_linkedin</code> or <code>revise_draft</code>.</p>
+              <p><code>revise_draft_node(state)</code>: Prompts Gemini with reviewer critique and generates new draft.</p>
+              <p><code>post_to_linkedin_node(state)</code>: Publishes final text to LinkedIn REST API.</p>
+            </div>
+          </div>
+
+          <!-- src/workflow.py -->
+          <div class="border border-slate-800 rounded-xl overflow-hidden">
+            <div class="bg-slate-800/80 px-4 py-2.5 font-mono text-xs font-bold text-blue-300 flex justify-between items-center">
+              <span>src/workflow.py</span>
+              <span class="text-[10px] font-sans font-normal text-slate-400">Workflow Orchestrator</span>
+            </div>
+            <div class="p-4 bg-slate-950 text-xs space-y-2">
+              <p><code>build_workflow_graph()</code>: Assembles nodes, edges, conditional edges, and compiles with <code>SqliteSaver</code>.</p>
+              <p><code>start_post_workflow(...)</code>: Starts execution up to the first interrupt.</p>
+              <p><code>resume_post_workflow(thread_id, approved, feedback)</code>: Resumes interrupted thread with <code>Command(resume=...)</code>.</p>
+              <p><code>get_post_details(thread_id)</code>: Fetches live snapshot from SQLite.</p>
+            </div>
+          </div>
+
+          <!-- src/api.py -->
+          <div class="border border-slate-800 rounded-xl overflow-hidden">
+            <div class="bg-slate-800/80 px-4 py-2.5 font-mono text-xs font-bold text-blue-300 flex justify-between items-center">
+              <span>src/api.py</span>
+              <span class="text-[10px] font-sans font-normal text-slate-400">FastAPI Application</span>
+            </div>
+            <div class="p-4 bg-slate-950 text-xs space-y-2">
+              <p><code>GET /</code>: Renders studio dashboard (<code>index.html</code>).</p>
+              <p><code>GET /review/{thread_id}</code>: Renders dedicated review interface (<code>review.html</code>).</p>
+              <p><code>POST /api/posts</code>: Triggers post creation workflow.</p>
+              <p><code>POST /api/posts/{thread_id}/review</code>: Handles review decision (approve or revise).</p>
+              <p><code>GET /api/posts/{thread_id}/quick-approve</code>: 1-click email approve link.</p>
+              <p><code>GET /api/health</code>: Healthcheck for EC2 and Docker.</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════════════════════ -->
+    <!-- TAB 4: 7-DAY ASYNCHRONOUS LIFECYCLE                                      -->
+    <!-- ════════════════════════════════════════════════════════════════════════ -->
+    <div id="tab-lifecycle" class="space-y-6 hidden">
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
+        <div>
+          <h2 class="text-base font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-clock text-amber-400"></i> Why SQLite Persistence is Essential for HITL
+          </h2>
+          <p class="text-xs text-slate-400 mt-1">
+            A step-by-step lecture walkthrough of what happens when human review takes days.
+          </p>
+        </div>
+
+        <div class="space-y-4 text-xs">
+          <!-- Step 1 -->
+          <div class="flex gap-4 items-start p-4 rounded-xl bg-slate-950 border border-slate-800">
+            <div class="px-2.5 py-1 rounded bg-blue-500/20 text-blue-400 font-mono font-bold shrink-0">Day 1: 10:00 AM</div>
+            <div>
+              <h4 class="font-bold text-white text-sm">Post Generation Initiated</h4>
+              <p class="text-slate-400 mt-1">
+                A user or scheduled cron job calls <code>POST /api/posts</code>. Gemini 2.5 Flash writes the post commentary. LangGraph reaches <code>ask_for_feedback_node</code> and calls <code>interrupt()</code>.
+              </p>
+              <div class="mt-2 p-2 bg-slate-900 rounded font-mono text-[11px] text-slate-300">
+                Action: Full graph channels are serialized to <code>data/checkpoints.db</code>. Email dispatched.
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="flex gap-4 items-start p-4 rounded-xl bg-slate-950 border border-slate-800">
+            <div class="px-2.5 py-1 rounded bg-purple-500/20 text-purple-400 font-mono font-bold shrink-0">Day 3: 04:00 PM</div>
+            <div>
+              <h4 class="font-bold text-white text-sm">Server Maintenance / Reboot</h4>
+              <p class="text-slate-400 mt-1">
+                The Docker container is restarted or updated. If we were using an in-memory saver, the workflow thread would be wiped out.
+              </p>
+              <div class="mt-2 p-2 bg-slate-900 rounded font-mono text-[11px] text-emerald-400">
+                Persistence Guarantee: <code>SqliteSaver</code> holds the complete interrupted state safe on disk.
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="flex gap-4 items-start p-4 rounded-xl bg-slate-950 border border-slate-800">
+            <div class="px-2.5 py-1 rounded bg-amber-500/20 text-amber-400 font-mono font-bold shrink-0">Day 6: 09:30 AM</div>
+            <div>
+              <h4 class="font-bold text-white text-sm">Reviewer Opens Email</h4>
+              <p class="text-slate-400 mt-1">
+                The human reviewer clicks the review link in their email. FastAPI queries <code>data/checkpoints.db</code>, loads the exact draft and revision history, and renders the review card in the browser.
+              </p>
+            </div>
+          </div>
+
+          <!-- Step 4 -->
+          <div class="flex gap-4 items-start p-4 rounded-xl bg-slate-950 border border-emerald-900/40 bg-emerald-950/10">
+            <div class="px-2.5 py-1 rounded bg-emerald-500/20 text-emerald-400 font-mono font-bold shrink-0">Day 6: 09:35 AM</div>
+            <div>
+              <h4 class="font-bold text-emerald-300 text-sm">Reviewer Clicks "Approve & Post"</h4>
+              <p class="text-slate-300 mt-1">
+                FastAPI calls <code>graph.invoke(Command(resume={'approved': True}), config={'configurable': {'thread_id': id}})</code>.
+              </p>
+              <div class="mt-2 p-2 bg-slate-900 rounded font-mono text-[11px] text-emerald-400">
+                Output: LinkedIn REST API returns <code>HTTP 201 Created</code> with live post ID <code>urn:li:share:...</code>!
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- JavaScript Controls & Dynamic Mermaid Rendering -->
+  <script>
+    const nodeDetails = {
+      generate_draft: {
+        title: "generate_draft_node",
+        module: "src/nodes.py",
+        desc: "Extracts post parameters (topic, key points, tone, audience) from state['info']. Formulates an expert prompt, invokes Google Gemini 2.5 Flash via OpenAI-compatible endpoint, sets draft, and records Revision #1.",
+        inputs: "state['info']: { topic, key_points, tone, audience }",
+        outputs: "{ draft: str, approved: False, history: [...], status: 'waiting_for_approval' }",
+        code: "def generate_draft_node(state: PostState) -> Dict[str, Any]:\n    info = state.get('info', {})\n    prompt = f'Topic: {info.get(\"topic\")}\\nKey points: {info.get(\"key_points\")}'\n    llm = get_llm()\n    response = llm.invoke([HumanMessage(content=prompt)])\n    draft = response.content.strip()\n    return {'draft': draft, 'approved': False, 'history': history}"
+      },
+      ask_for_feedback: {
+        title: "ask_for_feedback_node",
+        module: "src/nodes.py",
+        desc: "The Human-in-the-Loop core. 1) Dispatches email notification with review & 1-click approve URLs. 2) Calls LangGraph interrupt(). Execution immediately halts and persists to SQLite until a human responds.",
+        inputs: "state['draft'], state['history'], state['thread_id']",
+        outputs: "Suspends graph; upon resume returns { human_feedback: str, approved: bool }",
+        code: "def ask_for_feedback_node(state: PostState) -> Dict[str, Any]:\n    # 1. Send notification (Email + In-app)\n    notifier.send_draft_ready_notification(...)\n    # 2. Halt workflow\n    human_response = interrupt({'draft': draft})\n    # 3. Resume evaluation\n    approved = (human_response.get('approved') == True)\n    return {'approved': approved, 'human_feedback': feedback}"
+      },
+      decide_next: {
+        title: "decide_next",
+        module: "src/nodes.py",
+        desc: "Conditional edge routing logic. Evaluates state['approved']. If True, routes directly to post_to_linkedin. If False (user provided critique or requested changes), routes to revise_draft.",
+        inputs: "state['approved']: bool",
+        outputs: "'post_to_linkedin' OR 'revise_draft'",
+        code: "def decide_next(state: PostState) -> str:\n    if state.get('approved', False):\n        return 'post_to_linkedin'\n    return 'revise_draft'"
+      },
+      revise_draft: {
+        title: "revise_draft_node",
+        module: "src/nodes.py",
+        desc: "Triggered when reviewer requests revisions. Prompts Gemini with previous draft + reviewer's critique, creates revised post, increments revision count, and loops back to ask_for_feedback.",
+        inputs: "state['draft'], state['human_feedback']",
+        outputs: "{ draft: new_draft, approved: False, history: [...] }",
+        code: "def revise_draft_node(state: PostState) -> Dict[str, Any]:\n    prompt = f'Original: {draft}\\nReviewer Feedback: {feedback}\\nRevise post.'\n    response = get_llm().invoke([HumanMessage(content=prompt)])\n    return {'draft': response.content.strip(), 'approved': False}"
+      },
+      post_to_linkedin: {
+        title: "post_to_linkedin_node",
+        module: "src/nodes.py",
+        desc: "Final node. Calls LinkedInPublisher to make an authenticated POST request to https://api.linkedin.com/rest/posts with version 202511. Records post URN and public URL in state.",
+        inputs: "state['draft']",
+        outputs: "{ final_post: draft, post_id: urn, post_url: url, status: 'published' }",
+        code: "def post_to_linkedin_node(state: PostState) -> Dict[str, Any]:\n    publisher = LinkedInPublisher()\n    result = publisher.publish_post(state['draft'])\n    return {'post_id': result['post_id'], 'status': 'published'}"
+      }
+    };
+
+    function selectNode(key) {
+      document.querySelectorAll('[id^="node-"]').forEach(el => el.classList.remove('node-active'));
+      const el = document.getElementById('node-' + key);
+      if (el) el.classList.add('node-active');
+
+      const d = nodeDetails[key];
+      document.getElementById('node-inspector').innerHTML = `
+        <div class="border-b border-slate-800 pb-3">
+          <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 font-bold">${d.module}</span>
+          <h3 class="text-base font-bold text-white mt-2 font-mono">${d.title}()</h3>
+        </div>
+        <p class="text-xs text-slate-300 leading-relaxed">${d.desc}</p>
+        <div class="space-y-2 text-xs font-mono">
+          <div class="p-2.5 rounded-lg bg-slate-950 border border-slate-800">
+            <span class="text-blue-400 font-bold block mb-0.5">Inputs:</span>
+            <span class="text-slate-300">${d.inputs}</span>
+          </div>
+          <div class="p-2.5 rounded-lg bg-slate-950 border border-slate-800">
+            <span class="text-emerald-400 font-bold block mb-0.5">Outputs:</span>
+            <span class="text-slate-300">${d.outputs}</span>
+          </div>
+        </div>
+        <div>
+          <span class="text-xs text-slate-400 font-mono block mb-1">Code Snippet:</span>
+          <pre class="p-3 bg-slate-950 rounded-lg text-[11px] text-slate-200 overflow-x-auto border border-slate-800 font-mono">${d.code}</pre>
+        </div>
+      `;
+    }
+
+    // Clean, bulletproof Mermaid definitions
+    const mermaidDiagramCode = `graph TD
+    User["👤 Human Reviewer (Browser or Email)"]
+    Main["main.py (Application Entrypoint)"]
+    FastAPI["FastAPI App (src/api.py)"]
+    Endpoints["REST API Endpoints"]
+    UI["Jinja2 Web UI (index.html, review.html)"]
+    Graph["Compiled StateGraph (LangGraph 1.2)"]
+    State["PostState Schema"]
+    N1["generate_draft_node()"]
+    N2["ask_for_feedback_node() - interrupt"]
+    Router{"decide_next()"}
+    N3["revise_draft_node()"]
+    N4["post_to_linkedin_node()"]
+    LLM["Google Gemini 2.5 Flash (src/llm.py)"]
+    Notifier["Email Notifier (src/notifier.py)"]
+    LinkedIn["LinkedIn REST API v202511 (src/linkedin.py)"]
+    Checkpointer[("SQLite: data/checkpoints.db")]
+    Config["Configuration (src/config.py)"]
+
+    Main --> FastAPI
+    FastAPI --> Endpoints
+    FastAPI --> UI
+    Endpoints --> Graph
+    Graph --> State
+    Graph --> N1
+    Graph --> N2
+    Graph --> Router
+    Graph --> N3
+    Graph --> N4
+    N1 --> LLM
+    N2 --> Notifier
+    N2 -.->|Serializes state and halts| Checkpointer
+    N3 --> LLM
+    N4 --> LinkedIn
+    User -->|Receives Email| Notifier
+    User -->|Approves or Requests Changes| Endpoints
+    Config --> LLM
+    Config --> Notifier
+    Config --> LinkedIn
+    Config --> Checkpointer`;
+
+    const mermaidSequenceCode = `sequenceDiagram
+    autonumber
+    actor Reviewer as 👤 Human Reviewer
+    participant API as FastAPI (src/api.py)
+    participant Graph as LangGraph (src/workflow.py)
+    participant DB as SQLite (data/checkpoints.db)
+    participant LLM as Google Gemini (src/llm.py)
+    participant Mail as Notifier (src/notifier.py)
+    participant LI as LinkedIn API (src/linkedin.py)
+
+    Note over API,Graph: Phase 1: Post Generation
+    Reviewer->>API: POST /api/posts (Topic, Tone, Key Points)
+    API->>Graph: start_post_workflow()
+    Graph->>LLM: generate_draft_node()
+    LLM-->>Graph: Return draft commentary
+    Graph->>Mail: ask_for_feedback_node() -> send email
+    Mail-->>Reviewer: Email: Your draft is ready for review
+    Graph->>DB: interrupt() -> Serialize and save checkpoint
+
+    Note over Reviewer,DB: State stays in SQLite for 1 to 7+ days (Reboot safe)
+
+    Note over API,Graph: Phase 2: Asynchronous Review
+    alt Option A: Reviewer Requests Changes
+        Reviewer->>API: POST /api/posts/review (approved=false, feedback)
+        API->>Graph: resume_post_workflow(Command(resume=feedback))
+        Graph->>DB: Reload state snapshot from thread_id
+        Graph->>LLM: revise_draft_node(draft, feedback)
+        LLM-->>Graph: Return revised draft (v2)
+        Graph->>Mail: ask_for_feedback_node() -> send updated email
+        Graph->>DB: interrupt() -> Save v2 checkpoint to disk
+    else Option B: Reviewer Approves Post
+        Reviewer->>API: POST /api/posts/review (approved=true)
+        API->>Graph: resume_post_workflow(Command(resume=approved))
+        Graph->>DB: Reload state snapshot from thread_id
+        Graph->>LI: post_to_linkedin_node() (POST /rest/posts)
+        LI-->>Graph: 201 Created (URN: urn:li:share)
+        Graph->>DB: Final state status=published
+        Graph-->>API: Finished (END)
+        API-->>Reviewer: Post published with live LinkedIn URL!
+    end`;
+
+    let mermaidRendered = false;
+    async function renderMermaidDiagrams() {
+      if (mermaidRendered) return;
+      try {
+        const { svg: svg1 } = await mermaid.render('mermaid-svg-1', mermaidDiagramCode);
+        document.getElementById('mermaid-container-1').innerHTML = svg1;
+
+        const { svg: svg2 } = await mermaid.render('mermaid-svg-2', mermaidSequenceCode);
+        document.getElementById('mermaid-container-2').innerHTML = svg2;
+        mermaidRendered = true;
+      } catch (err) {
+        console.error("Mermaid render error:", err);
+        document.getElementById('mermaid-container-1').innerHTML = `<p class="text-xs text-rose-400">Diagram loading notice: Please refresh or view the native visual layer above.</p>`;
+      }
+    }
+
+    function setTab(tab) {
+      ['interactive', 'mermaid', 'functions', 'lifecycle'].forEach(t => {
+        document.getElementById(`tab-${t}`).classList.add('hidden');
+        document.getElementById(`btn-${t}`).className = "px-4 py-2.5 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 hover:text-white border border-slate-700 flex items-center gap-2 transition";
+      });
+      document.getElementById(`tab-${tab}`).classList.remove('hidden');
+      document.getElementById(`btn-${tab}`).className = "px-4 py-2.5 rounded-xl text-xs font-bold bg-blue-600 text-white shadow-lg shadow-blue-600/30 flex items-center gap-2 transition";
+
+      if (tab === 'mermaid') {
+        setTimeout(renderMermaidDiagrams, 50);
+      }
+    }
+
+    // Default selection
+    selectNode('ask_for_feedback');
+  </script>
+</body>
+</html>
