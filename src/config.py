@@ -44,6 +44,7 @@ class Settings(BaseSettings):
     SQLITE_DB_PATH: str = str(BASE_DIR / "data" / "checkpoints.db")
     HOST: str = "0.0.0.0"
     PORT: int = 8000
+    # Logging Settings
 
 
 settings = Settings()

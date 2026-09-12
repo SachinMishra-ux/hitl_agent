@@ -2,7 +2,7 @@ name: HITL Agent — Build & Deploy to AWS ECR / EC2
 
 on:
   push:
-    branches: [main]
+    branches: [devlopment]
   workflow_dispatch:
 
 env:
