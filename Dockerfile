@@ -5,10 +5,10 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 WORKDIR /app
 
-# Enable bytecode compilation
+# Enable bytecode compilation and unbuffered logs
 ENV UV_COMPILE_BYTECODE=1
-# Copy from cache instead of linking
 ENV UV_LINK_MODE=copy
+ENV PYTHONUNBUFFERED=1
 
 # Install essential system build dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -31,7 +31,7 @@ ENV PATH="/app/.venv/bin:$PATH"
 COPY src/ ./src/
 COPY main.py ./
 
-# Create data directory for SQLite persistent checkpoints
+# Create persistent storage directory for SQLite checkpoints
 RUN mkdir -p /app/data
 
 # Expose FastAPI service port
@@ -41,5 +41,5 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
   CMD curl -f http://localhost:8000/api/health || exit 1
 
-# Start the application
+# Start the application via uvicorn
 CMD ["uvicorn", "src.api:app", "--host", "0.0.0.0", "--port", "8000"]

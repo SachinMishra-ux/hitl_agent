@@ -50,33 +50,59 @@ To enable zero-downtime automated deployment on `git push main`:
    sudo ./svc.sh start
    ```
 
-4. On the EC2 instance, inside the workspace directory created by the runner, create your `.env` file containing:
-   ```env
-   GOOGLE_API_KEY="<your-google-gemini-key>"
-   LINKEDIN_ACCESS_TOKEN="<your-linkedin-token>"
-   LINKEDIN_AUTHOR_URN="<your-linkedin-urn>"
-   LINKEDIN_API_VERSION="202511"
-   BASE_URL="http://<EC2-PUBLIC-IP>:8000"
-   NOTIFICATION_EMAIL="sachin19566@gmail.com"
-   # Optional SMTP credentials for real emails
-   SMTP_HOST="smtp.gmail.com"
-   SMTP_PORT=587
-   SMTP_USER="<your-email>@gmail.com"
-   SMTP_PASSWORD="<app-specific-password>"
-   ```
+> [!NOTE]
+> You **do not** need to manually create or manage a `.env` file on the EC2 host. The deployment pipeline dynamically generates the `.env` file directly from your GitHub Secrets during CI/CD execution and secures its permissions (`chmod 600`).
 
 ---
 
 ## 3. GitHub Secrets Configuration
 
-In your GitHub repository, go to **Settings** > **Secrets and variables** > **Actions** > **New repository secret**:
+In your GitHub repository, navigate to **Settings** > **Secrets and variables** > **Actions** > **New repository secret**.
+
+### A. Required AWS Secrets (for CI/CD pipeline)
 
 | Secret Name | Description | Example |
 |---|---|---|
-| `AWS_ACCESS_KEY_ID` | IAM User Access Key | `AKIAIOSFODNN7EXAMPLE` |
-| `AWS_SECRET_ACCESS_KEY` | IAM User Secret Key | `wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY` |
-| `AWS_DEFAULT_REGION` | AWS Region of ECR | `us-east-1` |
-| `ECR_REPOSITORY_NAME` | Name of the ECR repo | `hitl-agent` |
+| `AWS_ACCESS_KEY_ID` | IAM User Access Key with ECR permissions | `AKIAIOSFODNN7EXAMPLE` |
+| `AWS_SECRET_ACCESS_KEY` | IAM User Secret Access Key | `wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY` |
+| `AWS_REGION` *(or `AWS_DEFAULT_REGION`)* | AWS Region where your ECR is located | `us-east-1` (or `ap-south-1`) |
+| `ECR_REPOSITORY_NAME` | Name of your ECR repository | `hitl-agent` |
+
+### B. Application Environment Secrets (Choose Option 1 or Option 2)
+
+#### Option 1: Single `ENV_FILE` Secret (Recommended & Fastest)
+Create a single repository secret named **`ENV_FILE`** and paste your entire `.env` content directly:
+
+```env
+GOOGLE_API_KEY=your_gemini_api_key_here
+GEMINI_MODEL=gemini-2.5-flash
+LINKEDIN_ACCESS_TOKEN=your_linkedin_access_token_here
+LINKEDIN_AUTHOR_URN=urn:li:person:xxxxxxxxxx
+LINKEDIN_API_VERSION=202511
+BASE_URL=http://<YOUR_EC2_PUBLIC_IP>:8000
+NOTIFICATION_EMAIL=your_email@gmail.com
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your_email@gmail.com
+SMTP_PASSWORD=your_google_app_password
+```
+
+#### Option 2: Individual Secrets
+If you prefer managing each secret individually, you can set the following secrets in GitHub:
+
+| Secret Name | Description | Default if omitted |
+|---|---|---|
+| `GOOGLE_API_KEY` | Google Gemini API Key | *(Required)* |
+| `GEMINI_MODEL` | Gemini LLM model | `gemini-2.5-flash` |
+| `LINKEDIN_ACCESS_TOKEN` | LinkedIn OAuth Bearer Token (Community Management API) | *(Required)* |
+| `LINKEDIN_AUTHOR_URN` | LinkedIn Author URN (`urn:li:person:...`) | *(Required)* |
+| `LINKEDIN_API_VERSION` | LinkedIn REST API Version | `202511` |
+| `BASE_URL` | Public URL for approval callback links | `http://localhost:8000` (set to `http://<EC2_IP>:8000`) |
+| `NOTIFICATION_EMAIL` | Destination email for approval requests | `sachin19566@gmail.com` |
+| `SMTP_HOST` | SMTP server host | e.g. `smtp.gmail.com` |
+| `SMTP_PORT` | SMTP port | `587` |
+| `SMTP_USER` | SMTP username / email address | e.g. `sachin19566@gmail.com` |
+| `SMTP_PASSWORD` | SMTP password / Google App Password (16 chars) | e.g. `xxxx xxxx xxxx xxxx` |
 
 ---
 

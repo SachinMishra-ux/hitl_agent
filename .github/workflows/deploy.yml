@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 env:
-  AWS_REGION: ${{ secrets.AWS_REGION }}
+  AWS_REGION: ${{ secrets.AWS_REGION || secrets.AWS_DEFAULT_REGION }}
   ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY_NAME || 'hitl-agent' }}
 
 jobs:
@@ -39,7 +39,7 @@ jobs:
         run: |
           echo "Building Docker image ${REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}..."
           docker build -t ${REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG} -t ${REGISTRY}/${ECR_REPOSITORY}:latest .
-          echo "Pushing image to ECR..."
+          echo "Pushing images to Amazon ECR..."
           docker push ${REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}
           docker push ${REGISTRY}/${ECR_REPOSITORY}:latest
 
@@ -66,6 +66,45 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
+      - name: Generate .env from GitHub Secrets
+        env:
+          ENV_CONTENT: ${{ secrets.ENV_FILE }}
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          GEMINI_MODEL: ${{ secrets.GEMINI_MODEL || 'gemini-2.5-flash' }}
+          LINKEDIN_ACCESS_TOKEN: ${{ secrets.LINKEDIN_ACCESS_TOKEN }}
+          LINKEDIN_AUTHOR_URN: ${{ secrets.LINKEDIN_AUTHOR_URN }}
+          LINKEDIN_API_VERSION: ${{ secrets.LINKEDIN_API_VERSION || '202511' }}
+          BASE_URL: ${{ secrets.BASE_URL || 'http://localhost:8000' }}
+          NOTIFICATION_EMAIL: ${{ secrets.NOTIFICATION_EMAIL || 'sachin19566@gmail.com' }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT || '587' }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+        run: |
+          echo "Configuring environment file from GitHub Secrets..."
+          if [ -n "$ENV_CONTENT" ]; then
+            echo "Populating .env from secrets.ENV_FILE..."
+            printf '%s\n' "$ENV_CONTENT" > .env
+          else
+            echo "Populating .env from individual GitHub secrets..."
+            cat <<EOF > .env
+GOOGLE_API_KEY=${GOOGLE_API_KEY}
+GEMINI_MODEL=${GEMINI_MODEL}
+LINKEDIN_ACCESS_TOKEN=${LINKEDIN_ACCESS_TOKEN}
+LINKEDIN_AUTHOR_URN=${LINKEDIN_AUTHOR_URN}
+LINKEDIN_API_VERSION=${LINKEDIN_API_VERSION}
+BASE_URL=${BASE_URL}
+NOTIFICATION_EMAIL=${NOTIFICATION_EMAIL}
+SMTP_HOST=${SMTP_HOST}
+SMTP_PORT=${SMTP_PORT}
+SMTP_USER=${SMTP_USER}
+SMTP_PASSWORD=${SMTP_PASSWORD}
+EOF
+          fi
+          # Protect environment file permissions
+          chmod 600 .env
+          echo ".env generated successfully (lines: $(wc -l < .env))"
+
       - name: Pull Latest Docker Image & Restart Application
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
@@ -73,12 +112,12 @@ jobs:
           echo "Pulling latest image ${REGISTRY}/${ECR_REPOSITORY}:latest..."
           docker pull ${REGISTRY}/${ECR_REPOSITORY}:latest
 
+          echo "Ensuring persistent storage directory exists..."
+          mkdir -p $(pwd)/data
+
           echo "Stopping previous container if running..."
           docker stop hitl-agent-service || true
           docker rm hitl-agent-service || true
-
-          echo "Ensuring persistent storage directory exists..."
-          mkdir -p $(pwd)/data
 
           echo "Starting newly deployed container..."
           docker run -d \
@@ -94,5 +133,16 @@ jobs:
 
       - name: Verify Service Health
         run: |
-          sleep 5
-          curl --fail http://localhost:8000/api/health || (docker logs hitl-agent-service && exit 1)
+          echo "Waiting for service to initialize..."
+          for i in {1..6}; do
+            if curl -sf http://localhost:8000/api/health > /dev/null; then
+              echo "Health check passed!"
+              curl -s http://localhost:8000/api/health
+              exit 0
+            fi
+            echo "Waiting for health check (attempt $i/6)..."
+            sleep 3
+          done
+          echo "Health check failed. Container logs:"
+          docker logs hitl-agent-service
+          exit 1
