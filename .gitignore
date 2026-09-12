@@ -14,4 +14,3 @@ wheels/
 .pytest_cache/
 data/*.db
 data/
-.github
