@@ -304,3 +304,8 @@ Refer to [DEPLOYMENT.md](DEPLOYMENT.md) for full instructions on deploying via G
 1. **Separation of Concerns**: Business logic (`nodes.py`), state modeling (`state.py`), external integrations (`linkedin.py`, `llm.py`, `notifier.py`), and storage (`checkpointer.py`) are strictly decoupled.
 2. **Why In-Memory Fails in Real Production**: Standard in-memory checkpointing only works for immediate feedback. In enterprise systems, humans take days to review. Persistent SQLite checkpointing guarantees durability across restarts.
 3. **Interrupt vs. Polling**: Instead of keeping an expensive worker thread sleeping or polling, LangGraph's `interrupt()` suspends the state completely, releasing computing resources until the resume command arrives.
+
+
+```
+docker compose up --build -d
+```
